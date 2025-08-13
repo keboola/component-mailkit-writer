@@ -1,0 +1,1 @@
+git@github.com:keboola/component-mailkit-writer.git/blob/master/LICENSE.md
