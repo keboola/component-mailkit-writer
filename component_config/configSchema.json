@@ -1,19 +1,35 @@
 {
   "type": "object",
-  "title": "extractor configuration",
+  "title": "Configuration",
   "required": [
-    "print_hello"
+    "client_id",
+    "client_md5",
+    "list_id"
   ],
   "properties": {
-    "print_hello": {
-      "type": "boolean",
-      "title": "Print Hello",
-      "propertyOrder": 1
+    "clientId": {
+      "type": "string",
+      "title": "Client ID",
+      "propertyOrder": 10,
+      "options": {
+        "tooltip": "Client ID as stated in Mailkit (Profil – Integrace – API ID)"
+      }
     },
-    "debug": {
-      "type": "boolean",
-      "title": "Debug",
-      "propertyOrder": 2
+    "#clientMd5": {
+      "type": "string",
+      "title": "Client MD5",
+      "propertyOrder": 20,
+      "options": {
+        "tooltip": "Client MD5 as stated in Mailkit (Profil – Integrace – MD5 kód)"
+      }
+    },
+    "listId": {
+      "type": "string",
+      "title": "Mailing list ID",
+      "propertyOrder": 30,
+      "options": {
+        "tooltip": "Check the URL of the mailing list. The ID is the number after `ID_user_list,`"
+      }
     }
   }
 }
