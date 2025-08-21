@@ -8,7 +8,7 @@
   ],
   "properties": {
     "clientId": {
-      "type": "string",
+      "type": "integer",
       "title": "Client ID",
       "propertyOrder": 10,
       "options": {
@@ -23,10 +23,21 @@
         "tooltip": "Client MD5 as stated in Mailkit (Profil – Integrace – MD5 kód)"
       }
     },
-    "listId": {
-      "type": "string",
-      "title": "Mailing list ID",
+    "verification_button": {
+      "type": "button",
+      "format": "sync-action",
       "propertyOrder": 30,
+      "options": {
+        "async": {
+          "label": "Verify Credentials",
+          "action": "verifyCredentials"
+        }
+      }
+    },
+    "listId": {
+      "type": "integer",
+      "title": "Mailing list ID",
+      "propertyOrder": 40,
       "options": {
         "tooltip": "Check the URL of the mailing list. The ID is the number after `ID_user_list,`"
       }
@@ -34,7 +45,8 @@
     "columnMapping": {
       "type": "array",
       "title": "Column mapping",
-      "description": "Source file column mapping.",
+      "propertyOrder": 50,
+      "description": "Assign columns in the source file to the correct fields in Mailkit.",
       "uniqueItems": true,
       "items": {
         "type": "object",
