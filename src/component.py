@@ -2,13 +2,13 @@ import csv
 import logging
 from typing import Any
 
+from keboola.component import sync_actions
 from keboola.component.base import CommonInterface, ComponentBase, sync_action
 from keboola.component.dao import TableDefinition
 from keboola.component.exceptions import UserException
 
 from configuration import ColumnMappingItem, Configuration
 from mailkit_client import MailkitClient
-from sync_action_templates import SyncActionTemplates
 
 
 class Component(ComponentBase):
@@ -33,8 +33,8 @@ class Component(ComponentBase):
     @sync_action("verifyCredentials")
     def list_mailing_lists(self):
         if self.mkc.mailinglist_list():
-            return SyncActionTemplates.success("Verification successful")
-        return SyncActionTemplates.error("Failed to verify credentials")
+            return sync_actions.ValidationResult("Verification successful", sync_actions.MessageType.SUCCESS)
+        return sync_actions.ValidationResult("Failed to verify credentials", sync_actions.MessageType.ERROR)
 
     def _create_recipients_list(
         self,
