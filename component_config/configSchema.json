@@ -8,7 +8,7 @@
   ],
   "properties": {
     "clientId": {
-      "type": "integer",
+      "type": "string",
       "title": "Client ID",
       "propertyOrder": 10,
       "options": {
