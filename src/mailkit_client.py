@@ -12,7 +12,7 @@ class MailkitClient:
     client_id: str
     client_md5: str
 
-    def mailinglist_list(self):
+    def mailinglist_list(self) -> dict | None:
         payload = {
             "function": "mailkit.mailinglist.list",
             "id": self.client_id,
@@ -25,13 +25,13 @@ class MailkitClient:
             logging.debug("Response body: %s", resp.text)
             if resp.status_code != 200:
                 raise UserException(f"Failed to get list of mailing lists: {resp.text}")
-            return True
+            return resp.json()
         except Exception as e:
             logging.exception("Error getting list of mailing lists: %s", e)
 
-        return False
+        return None
 
-    def mailinglist_import(self, mailing_list_id: int, recipients: list[dict]):
+    def mailinglist_import(self, mailing_list_id: int, recipients: list[dict]) -> None:
         payload = {
             "function": "mailkit.mailinglist.import",
             "id": self.client_id,

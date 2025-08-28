@@ -31,7 +31,7 @@ class Component(ComponentBase):
             logging.info(f"Mailing list import result: {result}")
 
     @sync_action("verifyCredentials")
-    def list_mailing_lists(self):
+    def verify_credentials(self):
         if self.mkc.mailinglist_list():
             return sync_actions.ValidationResult("Verification successful", sync_actions.MessageType.SUCCESS)
         return sync_actions.ValidationResult("Failed to verify credentials", sync_actions.MessageType.ERROR)
