@@ -3,7 +3,7 @@ import logging
 from typing import Any
 
 from keboola.component import sync_actions
-from keboola.component.base import CommonInterface, ComponentBase, sync_action
+from keboola.component.base import ComponentBase, sync_action
 from keboola.component.dao import TableDefinition
 from keboola.component.exceptions import UserException
 
@@ -19,16 +19,17 @@ class Component(ComponentBase):
         self.mkc = MailkitClient(self.params.client_id, self.params.client_md5)
 
     def run(self):
-        ci = CommonInterface()
-        tables = ci.get_input_tables_definitions()
+        tables = self.get_input_tables_definitions()
 
         for table in tables:
             col_mapping_dict = self._parse_column_mapping(self.params.column_mapping)
             recipients = self._create_recipients_list(table, col_mapping_dict)
 
             result = self.mkc.mailinglist_import(self.params.list_id, recipients)
-
-            logging.info(f"Mailing list import result: {result}")
+            if result:
+                # mailkit api currently returns 0 counts in every category (ok, skipped etc.) even in case of successful
+                # import, so we just log success when the import returned valid JSON response with HTTP 200
+                logging.info("Mailing list import result: success")
 
     @sync_action("verifyCredentials")
     def verify_credentials(self):

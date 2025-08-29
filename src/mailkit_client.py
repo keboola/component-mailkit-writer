@@ -21,7 +21,7 @@ class MailkitClient:
 
         try:
             resp = requests.post(ENDPOINT, json=payload)
-            logging.info("Mailkit API response: HTTP %i", resp.status_code)
+            logging.info("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
             logging.debug("Response body: %s", resp.text)
             if resp.status_code != 200:
                 raise UserException(f"Failed to get list of mailing lists: {resp.text}")
@@ -44,9 +44,10 @@ class MailkitClient:
 
         try:
             resp = requests.post(ENDPOINT, json=payload)
-            logging.info("Mailkit API response: HTTP %i", resp.status_code)
+            logging.info("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
             logging.debug("Response body: %s", resp.text)
             if resp.status_code != 200:
                 raise UserException(f"Failed to import mailing list: {resp.text}")
+            return resp.json()
         except Exception as e:
             raise Exception(f"Error during mailing list import: {e!r}")
