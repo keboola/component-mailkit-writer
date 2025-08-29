@@ -1,1 +1,1 @@
-git@github.com:keboola/component-mailkit-writer.git
+https://github.com/keboola/component-mailkit-writer

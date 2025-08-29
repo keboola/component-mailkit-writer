@@ -1,19 +1,116 @@
 {
   "type": "object",
-  "title": "extractor configuration",
+  "title": "Configuration",
   "required": [
-    "print_hello"
+    "clientId",
+    "#clientMd5",
+    "listId"
   ],
   "properties": {
-    "print_hello": {
-      "type": "boolean",
-      "title": "Print Hello",
-      "propertyOrder": 1
+    "clientId": {
+      "type": "string",
+      "title": "Client ID",
+      "propertyOrder": 10,
+      "options": {
+        "tooltip": "Client ID as stated in Mailkit (Profil – Integrace – API ID)"
+      }
     },
-    "debug": {
-      "type": "boolean",
-      "title": "Debug",
-      "propertyOrder": 2
+    "#clientMd5": {
+      "type": "string",
+      "title": "Client MD5",
+      "propertyOrder": 20,
+      "options": {
+        "tooltip": "Client MD5 as stated in Mailkit (Profil – Integrace – MD5 kód)"
+      }
+    },
+    "verification_button": {
+      "type": "button",
+      "format": "sync-action",
+      "propertyOrder": 30,
+      "options": {
+        "async": {
+          "label": "Verify Credentials",
+          "action": "verifyCredentials"
+        }
+      }
+    },
+    "listId": {
+      "type": "integer",
+      "title": "Mailing list ID",
+      "propertyOrder": 40,
+      "options": {
+        "tooltip": "Check the URL of the mailing list. The ID is the number after `ID_user_list,`"
+      }
+    },
+    "columnMapping": {
+      "type": "array",
+      "title": "Column mapping",
+      "propertyOrder": 50,
+      "description": "Assign columns in the source file to the correct fields in Mailkit.",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "Mapping",
+        "required": [
+          "srcCol",
+          "destCol"
+        ],
+        "properties": {
+          "srcCol": {
+            "type": "string",
+            "title": "Source Column"
+          },
+          "destCol": {
+            "type": "string",
+            "title": "Mailkit Column",
+            "enum": [
+              "first_name",
+              "last_name",
+              "email",
+              "status",
+              "company",
+              "prefix",
+              "vocative",
+              "reply_to",
+              "nick_name",
+              "gender",
+              "phone",
+              "mobile",
+              "fax",
+              "street",
+              "city",
+              "state",
+              "country",
+              "zip",
+              "custom1",
+              "custom2",
+              "custom3",
+              "custom4",
+              "custom5",
+              "custom6",
+              "custom7",
+              "custom8",
+              "custom9",
+              "custom10",
+              "custom11",
+              "custom12",
+              "custom13",
+              "custom14",
+              "custom15",
+              "custom16",
+              "custom17",
+              "custom18",
+              "custom19",
+              "custom20",
+              "custom21",
+              "custom22",
+              "custom23",
+              "custom24",
+              "custom25"
+            ]
+          }
+        }
+      }
     }
   }
 }

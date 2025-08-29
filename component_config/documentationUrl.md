@@ -1,1 +1,1 @@
-git@github.com:keboola/component-mailkit-writer.git/blob/master/README.md
+https://github.com/keboola/component-mailkit-writer/blob/master/README.md

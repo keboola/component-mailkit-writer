@@ -1,1 +1,1 @@
-git@github.com:keboola/component-mailkit-writer.git/blob/master/LICENSE.md
+https://github.com/keboola/component-mailkit-writer/blob/master/LICENSE.md

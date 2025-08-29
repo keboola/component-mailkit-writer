@@ -1,92 +1,73 @@
-"""
-Template Component main class.
-
-"""
 import csv
-from datetime import datetime
 import logging
+from typing import Any
 
-from keboola.component.base import ComponentBase
+from keboola.component import sync_actions
+from keboola.component.base import ComponentBase, sync_action
+from keboola.component.dao import TableDefinition
 from keboola.component.exceptions import UserException
 
-from configuration import Configuration
+from configuration import ColumnMappingItem, Configuration
+from mailkit_client import MailkitClient
 
 
 class Component(ComponentBase):
-    """
-        Extends base class for general Python components. Initializes the CommonInterface
-        and performs configuration validation.
-
-        For easier debugging the data folder is picked up by default from `../data` path,
-        relative to working directory.
-
-        If `debug` parameter is present in the `config.json`, the default logger is set to verbose DEBUG mode.
-    """
-
     def __init__(self):
         super().__init__()
 
+        self.params = Configuration(**self.configuration.parameters)
+        self.mkc = MailkitClient(self.params.client_id, self.params.client_md5)
+
     def run(self):
-        """
-        Main execution code
-        """
+        tables = self.get_input_tables_definitions()
 
-        # ####### EXAMPLE TO REMOVE
-        # check for missing configuration parameters
-        params = Configuration(**self.configuration.parameters)
+        for table in tables:
+            col_mapping_dict = self._parse_column_mapping(self.params.column_mapping)
+            recipients = self._create_recipients_list(table, col_mapping_dict)
 
-        # Access parameters in configuration
-        if params.print_hello:
-            logging.info("Hello World")
+            result = self.mkc.mailinglist_import(self.params.list_id, recipients)
+            if result:
+                # mailkit api currently returns 0 counts in every category (ok, skipped etc.) even in case of successful
+                # import, so we just log success when the import returned valid JSON response with HTTP 200
+                logging.info("Mailing list import result: success")
 
-        # get input table definitions
-        input_tables = self.get_input_tables_definitions()
-        for table in input_tables:
-            logging.info(f'Received input table: {table.name} with path: {table.full_path}')
+    @sync_action("verifyCredentials")
+    def verify_credentials(self):
+        if self.mkc.mailinglist_list():
+            return sync_actions.ValidationResult("Verification successful", sync_actions.MessageType.SUCCESS)
+        return sync_actions.ValidationResult("Failed to verify credentials", sync_actions.MessageType.ERROR)
 
-        if len(input_tables) == 0:
-            raise UserException("No input tables found")
+    def _create_recipients_list(
+        self,
+        table: TableDefinition,
+        column_mapping: dict[str, str],
+    ):
+        recipients = []
+        with open(table.full_path) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                recipients.append(self._get_renamed_columns(row, column_mapping))
+        logging.info(f"Recipients to be imported: {len(recipients)}")
+        return recipients
 
-        # get last state data/in/state.json from previous run
-        previous_state = self.get_state_file()
-        logging.info(previous_state.get('some_parameter'))
+    def _get_renamed_columns(
+        self,
+        row: dict[str, Any],
+        column_mapping: dict[str, str],
+    ) -> dict[str, str]:
+        if not column_mapping:
+            return row
 
-        # Create output table (Table definition - just metadata)
-        table = self.create_out_table_definition('output.csv', incremental=True, primary_key=['timestamp'])
+        renamed_row = {}
+        for k, v in row.items():
+            renamed_row[column_mapping.get(k) or k] = v
 
-        # get file path of the table (data/out/tables/Features.csv)
-        out_table_path = table.full_path
-        logging.info(out_table_path)
+        return renamed_row
 
-        # Add timestamp column and save into out_table_path
-        input_table = input_tables[0]
-        with (open(input_table.full_path, 'r') as inp_file,
-              open(table.full_path, mode='wt', encoding='utf-8', newline='') as out_file):
-            reader = csv.DictReader(inp_file)
-
-            columns = list(reader.fieldnames)
-            # append timestamp
-            columns.append('timestamp')
-
-            # write result with column added
-            writer = csv.DictWriter(out_file, fieldnames=columns)
-            writer.writeheader()
-            for in_row in reader:
-                in_row['timestamp'] = datetime.now().isoformat()
-                writer.writerow(in_row)
-
-        # Save table manifest (output.csv.manifest) from the Table definition
-        self.write_manifest(table)
-
-        # Write new state - will be available next run
-        self.write_state_file({"some_state_parameter": "value"})
-
-        # ####### EXAMPLE TO REMOVE END
+    def _parse_column_mapping(self, column_mapping: list[ColumnMappingItem]) -> dict[str, str]:
+        return {item.src_col: item.dest_col for item in column_mapping}
 
 
-"""
-        Main entrypoint
-"""
 if __name__ == "__main__":
     try:
         comp = Component()
