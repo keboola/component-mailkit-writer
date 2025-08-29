@@ -47,7 +47,7 @@ class Component(ComponentBase):
             reader = csv.DictReader(f)
             for row in reader:
                 recipients.append(self._get_renamed_columns(row, column_mapping))
-        logging.info(f"Recipients count: {len(recipients)}")
+        logging.info(f"Recipients to be imported: {len(recipients)}")
         return recipients
 
     def _get_renamed_columns(
