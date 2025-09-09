@@ -1,11 +1,12 @@
 __pycache__/
 .DS_Store
 .idea
+.ruff_cache
+.venv
 .vscode
 *.py[cod]
 *.egg-info
-/.venv
-/venv
+venv
 
 # kbc datafolder
-/data
+data
