@@ -21,13 +21,17 @@ class MailkitClient:
 
         try:
             resp = requests.post(ENDPOINT, json=payload)
-            logging.info("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
+            logging.debug("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
             logging.debug("Response body: %s", resp.text)
             if resp.status_code != 200:
-                raise UserException(f"Failed to get list of mailing lists: {resp.text}")
-            return resp.json()
+                raise UserException(resp.text)
+
+            result = resp.json()
+            if result:
+                logging.info("Getting list of mailing lists: OK")
+            return result
         except Exception as e:
-            logging.exception("Error getting list of mailing lists: %s", e)
+            logging.exception("Failed to get list of mailing lists: %s", e)
 
         return None
 
@@ -44,10 +48,16 @@ class MailkitClient:
 
         try:
             resp = requests.post(ENDPOINT, json=payload)
-            logging.info("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
+            logging.debug("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
             logging.debug("Response body: %s", resp.text)
             if resp.status_code != 200:
-                raise UserException(f"Failed to import mailing list: {resp.text}")
-            return resp.json()
+                raise UserException(resp.text)
+
+            result = resp.json()
+            if result:
+                # mailkit api currently returns 0 counts in every category (ok, skipped etc.)
+                # even in case of successful import, so we just log success when the import returned
+                # valid JSON response with HTTP 200
+                logging.info("Importing recipients: OK")
         except Exception as e:
-            raise Exception(f"Error during mailing list import: {e!r}")
+            raise Exception(f"Failed to import recipients: {e!r}")

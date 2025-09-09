@@ -28,12 +28,7 @@ class Component(ComponentBase):
         for table in tables:
             col_mapping_dict = self._parse_column_mapping(self.params.column_mapping)
             for recipients in self._create_recipients_list_in_batches(table, col_mapping_dict):
-                result = self.mkc.mailinglist_import(self.params.list_id, recipients)
-                if result:
-                    # mailkit api currently returns 0 counts in every category (ok, skipped etc.)
-                    # even in case of successful import, so we just log success when the import returned
-                    # valid JSON response with HTTP 200
-                    logging.info("Mailing list import result: success")
+                self.mkc.mailinglist_import(self.params.list_id, recipients)
 
     @sync_action("verifyCredentials")
     def verify_credentials(self):
