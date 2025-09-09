@@ -1,1 +1,1 @@
-Mailkit Writer long description
+The component allows you to create and update [Mailkit](https://www.mailkit.eu/en/) mailing lists. Mailkit is the most comprehensive tool for emailing and sms marketing on the market. Providing unrivaled overview of your email campaigns combined with a simple user interface and automated processing of emails. The level of automation in Mailkit allows you to create templates used for regular messaging with content automatically updated from data sources. With this component, you can simply import recipients from your KBC Storage tables.
