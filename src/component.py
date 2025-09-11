@@ -1,5 +1,6 @@
 import csv
 import logging
+from collections.abc import Iterator
 from typing import Any
 
 from keboola.component import sync_actions
@@ -9,6 +10,9 @@ from keboola.component.exceptions import UserException
 
 from configuration import ColumnMappingItem, Configuration
 from mailkit_client import MailkitClient
+
+
+BATCH_SIZE = 5_000
 
 
 class Component(ComponentBase):
@@ -23,13 +27,8 @@ class Component(ComponentBase):
 
         for table in tables:
             col_mapping_dict = self._parse_column_mapping(self.params.column_mapping)
-            recipients = self._create_recipients_list(table, col_mapping_dict)
-
-            result = self.mkc.mailinglist_import(self.params.list_id, recipients)
-            if result:
-                # mailkit api currently returns 0 counts in every category (ok, skipped etc.) even in case of successful
-                # import, so we just log success when the import returned valid JSON response with HTTP 200
-                logging.info("Mailing list import result: success")
+            for recipients in self._create_recipients_list_in_batches(table, col_mapping_dict):
+                self.mkc.mailinglist_import(self.params.list_id, recipients)
 
     @sync_action("verifyCredentials")
     def verify_credentials(self):
@@ -37,18 +36,26 @@ class Component(ComponentBase):
             return sync_actions.ValidationResult("Verification successful", sync_actions.MessageType.SUCCESS)
         return sync_actions.ValidationResult("Failed to verify credentials", sync_actions.MessageType.ERROR)
 
-    def _create_recipients_list(
+    def _create_recipients_list_in_batches(
         self,
         table: TableDefinition,
         column_mapping: dict[str, str],
-    ):
+    ) -> Iterator[list[dict]]:
+        total = 0
         recipients = []
         with open(table.full_path) as f:
             reader = csv.DictReader(f)
             for row in reader:
                 recipients.append(self._get_renamed_columns(row, column_mapping))
-        logging.info(f"Recipients to be imported: {len(recipients)}")
-        return recipients
+                total += 1
+                if total % BATCH_SIZE == 0:
+                    logging.info(f"Importing {BATCH_SIZE} recipients (total: {total})...")
+                    yield recipients
+                    recipients = []
+
+        if recipients:
+            logging.info(f"Importing {len(recipients)} recipients (total: {total})...")
+            yield recipients
 
     def _get_renamed_columns(
         self,

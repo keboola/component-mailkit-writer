@@ -52,7 +52,7 @@ wheels = [
 ]
 
 [[package]]
-name = "cookiecutter"
+name = "mailkit-writer"
 source = { virtual = "." }
 dependencies = [
     { name = "flake8" },
