@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 
+import backoff
 import requests
 from keboola.component.exceptions import UserException
 
@@ -12,6 +13,14 @@ class MailkitClient:
     client_id: str
     client_md5: str
 
+    @backoff.on_exception(backoff.expo, (requests.Timeout, requests.HTTPError), max_tries=3)
+    def _post_with_retry(self, payload) -> requests.Response:
+        resp = requests.post(ENDPOINT, json=payload)
+        logging.debug("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
+        logging.debug("Response body: %s", resp.text)
+        resp.raise_for_status()
+        return resp
+
     def mailinglist_list(self) -> dict | None:
         payload = {
             "function": "mailkit.mailinglist.list",
@@ -20,9 +29,7 @@ class MailkitClient:
         }
 
         try:
-            resp = requests.post(ENDPOINT, json=payload)
-            logging.debug("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
-            logging.debug("Response body: %s", resp.text)
+            resp = self._post_with_retry(payload)
             if resp.status_code != 200:
                 raise UserException(resp.text)
 
@@ -47,9 +54,7 @@ class MailkitClient:
         }
 
         try:
-            resp = requests.post(ENDPOINT, json=payload)
-            logging.debug("Mailkit API response: HTTP %i %s", resp.status_code, resp.reason)
-            logging.debug("Response body: %s", resp.text)
+            resp = self._post_with_retry(payload)
             if resp.status_code != 200:
                 raise UserException(resp.text)
 
