@@ -1,1 +1,1 @@
-E-mail and SMS marketing platform with data based automation, dynamic content and personalization
+Writes a Keboola table to a Mailkit mailing list as email recipients.
